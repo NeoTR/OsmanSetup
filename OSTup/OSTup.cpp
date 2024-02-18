@@ -8,6 +8,11 @@
 
 #pragma comment(lib, "Shell32.lib") 
 
+struct App {
+    std::string cmd;
+    std::string name;
+};
+
 void listFilesInDirectory(const std::string& path, WORD color) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, color);
@@ -48,33 +53,52 @@ void setupProgram(const std::string& diskPath) {
     system("cls");
     std::cout << "Setting up programs" << std::endl;
 
-    std::cout << "\nConfiguring Spicetify" << std::endl;
-    std::string powershellCommand = "powershell -Command \"iwr -useb https://raw.githubusercontent.com/spicetify/spicetify-marketplace/main/resources/install.ps1 | iex\"";
-    system(powershellCommand.c_str());
+    std::vector<App> apps = {
+        {"powershell -Command \"iwr -useb https://raw.githubusercontent.com/spicetify/spicetify-marketplace/main/resources/install.ps1 | iex\"", "Spicetify"},
+        {"https://github.com/Vencord/Installer/releases/latest/download/VencordInstallerCli.exe", "VenCord"},
+    };
 
-    PWSTR appDataPath;
-    SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &appDataPath);
-    std::wstring appDataPathW(appDataPath);
-    std::string appDataPathA(appDataPathW.begin(), appDataPathW.end());
-    CoTaskMemFree(appDataPath);
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    std::string osmanSetupPath = appDataPathA + "\\OsmanSetup";
-    std::string downloadsPath = osmanSetupPath + "\\Downloads";
-    std::filesystem::create_directories(downloadsPath);
+    for (const App& app : apps) {
+        SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+        std::cout << "  - " << app.name << "\n";
+        SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
+    }
 
-    system("cls");
+    std::string appChoice;
+    std::cout << "\nEnter the name of the program you want to setup: ";
+    std::cin >> appChoice;
 
-    std::cout << "\nConfiguring VenCord" << std::endl;
-    std::string vencordURL = "https://github.com/Vencord/Installer/releases/latest/download/VencordInstallerCli.exe";
-    std::string curlCommand = "curl -L -o " + downloadsPath + "\\VencordInstallerCli.exe " + vencordURL;
-    std::cout << "Downloading VenCord..." << std::endl;
-    system(curlCommand.c_str());
-       
-    system("cls");
-    std::cout << "\nRunning VenCord" << std::endl;
-    std::string vencordPath = downloadsPath + "\\VencordInstallerCli.exe";
-    executeFile(std::wstring(vencordPath.begin(), vencordPath.end()));
+    if (appChoice == "Spicetify") {
+        std::cout << "\nConfiguring Spicetify" << std::endl;
+        std::string powershellCommand = "powershell -Command \"iwr -useb https://raw.githubusercontent.com/spicetify/spicetify-marketplace/main/resources/install.ps1 | iex\"";
+        system(powershellCommand.c_str());
+    }
+    else if (appChoice == "VenCord") {
+        PWSTR appDataPath;
+        SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &appDataPath);
+        std::wstring appDataPathW(appDataPath);
+        std::string appDataPathA(appDataPathW.begin(), appDataPathW.end());
+        CoTaskMemFree(appDataPath);
 
+        std::string osmanSetupPath = appDataPathA + "\\OsmanSetup";
+        std::string downloadsPath = osmanSetupPath + "\\Downloads";
+        std::filesystem::create_directories(downloadsPath);
+
+        system("cls");
+
+        std::cout << "\nConfiguring VenCord" << std::endl;
+        std::string vencordURL = "https://github.com/Vencord/Installer/releases/latest/download/VencordInstallerCli.exe";
+        std::string curlCommand = "curl -L -o " + downloadsPath + "\\VencordInstallerCli.exe " + vencordURL;
+        std::cout << "Downloading VenCord..." << std::endl;
+        system(curlCommand.c_str());
+
+        system("cls");
+        std::cout << "\nRunning VenCord" << std::endl;
+        std::string vencordPath = downloadsPath + "\\VencordInstallerCli.exe";
+        executeFile(std::wstring(vencordPath.begin(), vencordPath.end()));
+    }
 
     std::cout << "\nSetup complete." << std::endl;
 
@@ -105,6 +129,7 @@ int main() {
         ss >> drive >> volume;
         if (!drive.empty() && drive != "Name") {
             disks.push_back(std::make_pair(drive, volume));
+            SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
             std::cout << count << ". " << drive << " (" << volume << ")" << std::endl;
             count++;
         }
@@ -112,6 +137,7 @@ int main() {
 
     _pclose(pipe);
 
+    SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
     std::cout << "\nEnter the number corresponding to the disk you want to select: ";
     int diskChoice;
     std::cin >> diskChoice;
@@ -126,6 +152,7 @@ int main() {
 
     system("cls");
 
+    SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
     std::cout << "\nYou have chosen a disk: ";
     SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
     std::cout << selectedDisk << std::endl;
