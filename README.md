@@ -15,6 +15,7 @@ Option 1.
   2. Open the project in Visual Studio.
   3. Build the project.
   4. Run the resulting executable as an administrator.
+
 Option 2. 
   1. Download the latest release
   2. Run the executable as an administrtor.
