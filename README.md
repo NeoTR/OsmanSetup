@@ -23,7 +23,3 @@ Option 2.
 ## ⚠️ Note
 
 This program modifies system settings and should be used with caution. Always ensure you have a backup of your system before making any changes.
-
-## 📜 License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
